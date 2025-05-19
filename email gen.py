@@ -2,7 +2,7 @@ import random
 import tkinter as tk
 from tkinter import simpledialog, ttk, filedialog
 
-# Expanded lists of Mexican and American names (100+ names each)
+# Expanded name lists
 first_names = [
     "Alejandro", "Beatriz", "Carlos", "Diana", "Emiliano", "Fernanda", "Gabriel", "Hernando",
     "James", "Emily", "Michael", "Jessica", "David", "Ashley", "John", "Sarah", "Christopher", "Jennifer",
@@ -37,9 +37,8 @@ def generate_names():
     if num_names:
         name_list.delete(0, tk.END)  # Clear previous names
 
-        # Get checked suffixes
         selected_suffixes = [suffix.get() for suffix in email_options if suffix.get()]
-        if not selected_suffixes:  # Default to @gmail.com if no suffix is selected
+        if not selected_suffixes:
             selected_suffixes = ["@gmail.com"]
 
         names = []
@@ -47,20 +46,18 @@ def generate_names():
             first_name = random.choice(first_names)
             last_name = random.choice(last_names)
 
-            # Create a version of the name for each selected suffix (one word format)
             for suffix in selected_suffixes:
                 full_name = f"{first_name}{last_name}{suffix}"
                 names.append(full_name)
 
-        # Display only a limited number in the list to prevent slow performance
-        for name in names[:500]:  # Show the first 500 names in the GUI
+        for name in names[:500]:  # Display the first 500 names
             name_list.insert(tk.END, name)
 
         return names  # Return full list for saving
 
 def save_names():
-    """Save generated names to an RTF file."""
-    names = generate_names()  # Ensure names are generated before saving
+    """Save currently displayed names in the listbox to an RTF file."""
+    names = name_list.get(0, tk.END)  # Get all names from the listbox
     if names:
         file_path = filedialog.asksaveasfilename(defaultextension=".rtf", filetypes=[("Rich Text Format", "*.rtf")])
         if file_path:
@@ -71,12 +68,12 @@ def save_names():
                 file.write("}\n")
             print(f"Names saved to {file_path}")
 
-def copy_selected():
-    """Copy selected name to clipboard."""
-    selected_name = name_list.get(tk.ACTIVE)
-    if selected_name:
+def copy_all():
+    """Copy all generated emails to clipboard."""
+    all_names = name_list.get(0, tk.END)  # Get all names from the listbox
+    if all_names:
         root.clipboard_clear()
-        root.clipboard_append(selected_name)
+        root.clipboard_append("\n".join(all_names))  # Copy all names, each on a new line
         root.update()
 
 # Create GUI window
@@ -96,7 +93,7 @@ for label in suffix_labels:
 generate_button = tk.Button(root, text="Generate Names", command=generate_names)
 generate_button.pack(pady=10)
 
-# Listbox for names (displays only first 500 for performance)
+# Listbox for names
 name_list = tk.Listbox(root, width=50, height=15)
 name_list.pack()
 
@@ -104,9 +101,9 @@ name_list.pack()
 save_button = tk.Button(root, text="Save Names as RTF", command=save_names)
 save_button.pack(pady=5)
 
-# Copy name button
-copy_button = tk.Button(root, text="Copy Selected Name", command=copy_selected)
-copy_button.pack(pady=10)
+# Copy all names button
+copy_all_button = tk.Button(root, text="Copy All Emails", command=copy_all)
+copy_all_button.pack(pady=10)
 
 # Run the GUI
 root.mainloop()
